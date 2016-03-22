@@ -73,14 +73,14 @@ angular.module('ngBootbox', [])
         actionOK: '&ngBootboxPromptAction',
         actionCancel: '&ngBootboxPromptActionCancel',
         value: '@ngBootboxPromptDefaultValue',
-        selectAllOnFocus: '@ngBootboxPromptSelectAllOnFocus'
+        promptOptions: '@ngBootboxPromptOptions'
       },
       link: function (scope, element, attr) {
         var msg = attr.ngBootboxPrompt || "Are you sure?";
         var value = attr.ngBootboxPromptDefaultValue || "";
-        var selectAllOnFocus = scope.$eval(attr.ngBootboxPromptSelectAllOnFocus) || false;
+        var options = scope.$eval(attr.ngBootboxPromptOptions) || {};
         element.bind('click', function () {
-          $ngBootbox.prompt(msg, value, selectAllOnFocus).then(function (result) {
+          $ngBootbox.prompt(msg, value, options).then(function (result) {
             scope.actionOK({ result: result });
           }, function () {
             scope.actionCancel();
@@ -146,12 +146,11 @@ angular.module('ngBootbox', [])
         });
         return deferred.promise;
       },
-      prompt: function (msg, value, selectAllOnFocus) {
+      prompt: function (msg, value, options) {
         var deferred = $q.defer();
-        $window.bootbox.prompt({
+        var defaultOptions = {
           title: msg,
           value: value || '',
-          selectAllOnFocus: selectAllOnFocus || false,
           callback: function(result) {
             if (result !== null) {
               deferred.resolve(result);
@@ -160,7 +159,8 @@ angular.module('ngBootbox', [])
               deferred.reject();
             }
           }
-        });
+        };
+        $window.bootbox.prompt(angular.merge(defaultOptions, options));
         return deferred.promise;
       },
       customDialog: function (options) {
